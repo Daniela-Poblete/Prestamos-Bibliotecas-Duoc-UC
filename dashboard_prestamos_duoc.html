@@ -385,7 +385,8 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
                 <th onclick="sortTable(6)" style="text-align:right">MBB 2023</th>
                 <th onclick="sortTable(7)" style="text-align:right">MBB 2024</th>
                 <th onclick="sortTable(8)" style="text-align:right">MBB 2025</th>
-                <th>Rel.</th>
+                <th onclick="sortTable(9)" style="text-align:right">MBB Var 24/23</th>
+                <th onclick="sortTable(10)" style="text-align:right">MBB Var 25/24</th>
               </tr>
             </thead>
             <tbody id="sede-tbody"></tbody>
@@ -623,10 +624,12 @@ function rTable(){
   let arr=Object.entries(SEDES).filter(([s])=>selSedes.has(s));
   const maxU25=Math.max(...arr.map(([,v])=>v.u25));
   arr.sort(([sa,a],[sb,b])=>{
-    const keys=[null,'u23','u24','u25',null,null,'m23','m24','m25'];
     if(sortCol===0)return sortAsc?sa.localeCompare(sb):sb.localeCompare(sa);
     if(sortCol===4){const pa=pct(a.u24,a.u23),pb=pct(b.u24,b.u23);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
     if(sortCol===5){const pa=pct(a.u25,a.u24),pb=pct(b.u25,b.u24);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
+    if(sortCol===9){const pa=pct(a.m24,a.m23),pb=pct(b.m24,b.m23);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
+    if(sortCol===10){const pa=pct(a.m25,a.m24),pb=pct(b.m25,b.m24);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
+    const keys=[null,'u23','u24','u25',null,null,'m23','m24','m25',null,null];
     const k=keys[sortCol];if(!k)return 0;
     return sortAsc?a[k]-b[k]:b[k]-a[k];
   });
@@ -636,8 +639,22 @@ function rTable(){
     return`<span class="pill ${cls}">${sym}${Math.abs(v)}%</span>`;
   };
   tbody.innerHTML=arr.map(([s,d])=>{
-    const v24=pct(d.u24,d.u23),v25=pct(d.u25,d.u24),bw=Math.round(d.u25/maxU25*100);
-    return`<tr><td class="td-s">${s}</td><td class="td-n">${fN(d.u23)}</td><td class="td-n">${fN(d.u24)}</td><td class="td-n" style="font-weight:700">${fN(d.u25)}</td><td class="td-c">${pill(v24)}</td><td class="td-c">${pill(v25)}</td><td class="td-n">${fN(d.m23)}</td><td class="td-n">${fN(d.m24)}</td><td class="td-n">${fN(d.m25)}</td><td><span class="bar-w"><span class="bar-f" style="width:${bw}%"></span></span></td></tr>`;
+    const v24=pct(d.u24,d.u23),v25=pct(d.u25,d.u24);
+    const mv24=pct(d.m24,d.m23),mv25=pct(d.m25,d.m24);
+    const bw=Math.round(d.u25/maxU25*100);
+    return`<tr>
+      <td class="td-s">${s}</td>
+      <td class="td-n">${fN(d.u23)}</td>
+      <td class="td-n">${fN(d.u24)}</td>
+      <td class="td-n" style="font-weight:700">${fN(d.u25)}</td>
+      <td class="td-c">${pill(v24)}</td>
+      <td class="td-c">${pill(v25)}</td>
+      <td class="td-n">${fN(d.m23)}</td>
+      <td class="td-n">${fN(d.m24)}</td>
+      <td class="td-n" style="font-weight:700">${fN(d.m25)}</td>
+      <td class="td-c">${pill(mv24)}</td>
+      <td class="td-c">${pill(mv25)}</td>
+    </tr>`;
   }).join('');
   document.querySelectorAll('#sede-table thead th').forEach((th,i)=>{
     th.classList.remove('asc','desc');
