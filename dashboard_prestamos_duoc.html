@@ -88,19 +88,17 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
 .ctrl-btn.y24.active{background:#001a2e;border-color:#2563AD;color:#4A9FE0}
 .ctrl-btn.y25.active{background:#2a0005;border-color:#a00010;color:#E8192C}
 
-/* SEDE DROPDOWN */
+/* SEDE DROPDOWN - replaced by side panel */
 .sede-dropdown{position:relative}
 .sede-trigger{padding:7px 32px 7px 16px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:13px;font-weight:600;color:#444;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap;min-width:180px;position:relative;display:flex;align-items:center;gap:6px}
 .sede-trigger::after{content:'▾';position:absolute;right:12px;font-size:11px;color:#999}
 .sede-trigger:hover{border-color:var(--yellow2)}
 .sede-trigger.has-sel{background:var(--black);border-color:var(--yellow2);color:var(--yellow)}
-.sede-menu{position:absolute;top:calc(100% + 10px);left:0;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);width:280px;max-height:400px;overflow-y:auto;z-index:9999;display:none;padding:10px}
-.sede-menu.open{display:block}
-.sede-menu-header{display:flex;justify-content:space-between;padding:4px 8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
-.sede-menu-header button{font-size:12px;font-family:'Outfit',sans-serif;font-weight:700;color:var(--black);background:none;border:none;cursor:pointer;text-decoration:underline}
-.sede-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:background 150ms;color:#333}
-.sede-item:hover{background:#f5f3ee}
-.sede-item input[type=checkbox]{accent-color:var(--black);width:16px;height:16px;flex-shrink:0}
+.sede-menu{display:none}
+.sede-menu-header button{display:none}
+.sede-item{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:background 150ms;color:#333;border-bottom:1px solid #f5f3ee}
+.sede-item:hover{background:#f9f7f2}
+.sede-item input[type=checkbox]{accent-color:#111;width:18px;height:18px;flex-shrink:0;cursor:pointer}
 
 /* MAIN */
 .main{max-width:1400px;margin:0 auto;padding:36px 48px 60px}
@@ -254,18 +252,9 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
     </div>
     <div class="ctrl-group">
       <span class="ctrl-label">Sedes</span>
-      <div class="sede-dropdown">
-        <div class="sede-trigger" id="sede-trigger" onclick="toggleSedeMenu()">
-          <span id="sede-trigger-text">Todas las sedes</span>
-        </div>
-        <div class="sede-menu" id="sede-menu">
-          <div class="sede-menu-header">
-            <button onclick="selectAllSedes()">Seleccionar todas</button>
-            <button onclick="clearSedes()">Limpiar</button>
-          </div>
-          <div id="sede-checkboxes"></div>
-        </div>
-      </div>
+      <button class="ctrl-btn" id="sede-trigger" onclick="toggleSedePanel()">
+        <span id="sede-trigger-text">Todas las sedes ▾</span>
+      </button>
     </div>
     <div class="ctrl-group">
       <span class="ctrl-label">Años</span>
@@ -408,6 +397,33 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
 
 </main>
 
+<!-- SEDE SIDE PANEL OVERLAY -->
+<div id="sede-overlay" onclick="toggleSedePanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;backdrop-filter:blur(2px)"></div>
+<div id="sede-panel" style="
+  position:fixed;top:0;right:-360px;width:340px;height:100vh;
+  background:#fff;z-index:9000;
+  box-shadow:-4px 0 32px rgba(0,0,0,0.18);
+  transition:right 0.28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  font-family:'Outfit',sans-serif;
+">
+  <div style="background:#111;padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:4px">Filtrar por sede</div>
+      <div style="font-size:16px;font-weight:800;color:#fff" id="panel-count">20 sedes seleccionadas</div>
+    </div>
+    <button onclick="toggleSedePanel()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 150ms" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕</button>
+  </div>
+  <div style="padding:12px 16px;border-bottom:1px solid #eee;display:flex;gap:8px;flex-shrink:0">
+    <button onclick="selectAllSedes()" style="flex:1;padding:8px;background:#111;color:#F5B800;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Seleccionar todas</button>
+    <button onclick="clearSedes()" style="flex:1;padding:8px;background:#f5f3ee;color:#333;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Limpiar</button>
+  </div>
+  <div id="sede-checkboxes" style="overflow-y:auto;flex:1;padding:8px 12px"></div>
+  <div style="padding:16px;border-top:1px solid #eee;flex-shrink:0">
+    <button onclick="toggleSedePanel()" style="width:100%;padding:12px;background:#111;color:#F5B800;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">Aplicar y cerrar</button>
+  </div>
+</div>
+
 <footer class="footer">
   <div class="footer-brand">Duoc<span>UC</span></div>
   <div class="footer-text">Sistema de Bibliotecas · Dashboard Indicadores Anuales 2023–2025 · Datos: Indicadores Anuales xlsx</div>
@@ -469,10 +485,6 @@ const C={2023:{l:'#F5B800',f:'rgba(245,184,0,0.15)'},2024:{l:'#4A9FE0',f:'rgba(7
 
 document.addEventListener('DOMContentLoaded',()=>{
   buildCbx();renderAll();
-  document.addEventListener('click',e=>{
-    if(!document.getElementById('sede-trigger').contains(e.target)&&!document.getElementById('sede-menu').contains(e.target))
-      document.getElementById('sede-menu').classList.remove('open');
-  });
 });
 
 function buildCbx(){
@@ -483,9 +495,14 @@ function buildCbx(){
     c.appendChild(d);
   });
 }
-function toggleSedeMenu(){
-  document.getElementById('sede-menu').classList.toggle('open');
+function toggleSedePanel(){
+  const panel=document.getElementById('sede-panel');
+  const overlay=document.getElementById('sede-overlay');
+  const isOpen=panel.style.right==='0px';
+  panel.style.right=isOpen?'-360px':'0px';
+  overlay.style.display=isOpen?'none':'block';
 }
+function toggleSedeMenu(){ toggleSedePanel(); }
 function scrollTo(id, btn){
   const el = document.getElementById(id);
   if(!el) return;
@@ -500,10 +517,23 @@ function selectAllSedes(){selSedes=new Set(Object.keys(SEDES));document.querySel
 function clearSedes(){selSedes.clear();document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=false);upLbl();refresh()}
 function toggleSede(s){selSedes.has(s)?selSedes.delete(s):selSedes.add(s);upLbl();refresh()}
 function upLbl(){
-  const n=selSedes.size,tot=Object.keys(SEDES).length,t=document.getElementById('sede-trigger'),tx=document.getElementById('sede-trigger-text');
-  if(n===tot){tx.textContent='Todas las sedes';t.classList.remove('has-sel')}
-  else if(!n){tx.textContent='Sin sedes';t.classList.add('has-sel')}
-  else{tx.textContent=`${n} sede${n>1?'s':''}`;t.classList.add('has-sel')}
+  const n=selSedes.size,tot=Object.keys(SEDES).length;
+  const tx=document.getElementById('sede-trigger-text');
+  const pc=document.getElementById('panel-count');
+  const btn=document.getElementById('sede-trigger');
+  if(n===tot){
+    tx.textContent='Todas las sedes ▾';
+    if(pc)pc.textContent='20 sedes seleccionadas';
+    btn.classList.remove('active');
+  } else if(!n){
+    tx.textContent='Sin sedes ▾';
+    if(pc)pc.textContent='0 sedes seleccionadas';
+    btn.classList.add('active');
+  } else {
+    tx.textContent=`${n} sede${n>1?'s':''} ▾`;
+    if(pc)pc.textContent=`${n} de ${tot} sedes`;
+    btn.classList.add('active');
+  }
 }
 function setMetric(m){metric=m;document.querySelectorAll('[data-metric]').forEach(b=>b.classList.toggle('active',b.dataset.metric===m));refresh()}
 function setView(v){view=v;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));refresh()}
