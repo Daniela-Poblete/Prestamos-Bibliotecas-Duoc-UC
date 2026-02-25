@@ -183,10 +183,10 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
   </div>
   <div class="nav-section">Sistema de<br>Bibliotecas</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="scrollTo('sec-resumen',this)">Resumen</button>
-    <button class="nav-tab" onclick="scrollTo('sec-tendencias',this)">Tendencias</button>
-    <button class="nav-tab" onclick="scrollTo('sec-sedes',this)">Por Sede</button>
-    <button class="nav-tab" onclick="scrollTo('sec-estacionalidad',this)">Estacionalidad</button>
+    <button class="nav-tab active" onclick="navScrollTo('sec-resumen',this)">Resumen</button>
+    <button class="nav-tab" onclick="navScrollTo('sec-tendencias',this)">Tendencias</button>
+    <button class="nav-tab" onclick="navScrollTo('sec-sedes',this)">Por Sede</button>
+    <button class="nav-tab" onclick="navScrollTo('sec-estacionalidad',this)">Estacionalidad</button>
   </div>
   <div class="nav-date">Datos: 2023 – 2025</div>
 </nav>
@@ -503,10 +503,9 @@ function toggleSedePanel(){
   overlay.style.display=isOpen?'none':'block';
 }
 function toggleSedeMenu(){ toggleSedePanel(); }
-function scrollTo(id, btn){
+function navScrollTo(id, btn){
   const el = document.getElementById(id);
   if(!el) return;
-  // Offset for sticky navbar (56px) + controls bar (~52px) + small margin
   const offset = 56 + 52 + 16;
   const top = el.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({top, behavior:'smooth'});
