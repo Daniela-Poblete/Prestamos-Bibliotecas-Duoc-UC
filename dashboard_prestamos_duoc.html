@@ -89,12 +89,12 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
 .ctrl-btn.y25.active{background:#2a0005;border-color:#a00010;color:#E8192C}
 
 /* SEDE DROPDOWN */
-.sede-dropdown{position:static}
+.sede-dropdown{position:relative}
 .sede-trigger{padding:7px 32px 7px 16px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:13px;font-weight:600;color:#444;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap;min-width:180px;position:relative;display:flex;align-items:center;gap:6px}
 .sede-trigger::after{content:'▾';position:absolute;right:12px;font-size:11px;color:#999}
 .sede-trigger:hover{border-color:var(--yellow2)}
 .sede-trigger.has-sel{background:var(--black);border-color:var(--yellow2);color:var(--yellow)}
-.sede-menu{position:fixed;top:auto;left:auto;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);width:300px;max-height:420px;overflow-y:auto;z-index:9999;display:none;padding:10px}
+.sede-menu{position:absolute;top:calc(100% + 10px);left:0;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);width:280px;max-height:400px;overflow-y:auto;z-index:9999;display:none;padding:10px}
 .sede-menu.open{display:block}
 .sede-menu-header{display:flex;justify-content:space-between;padding:4px 8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
 .sede-menu-header button{font-size:12px;font-family:'Outfit',sans-serif;font-weight:700;color:var(--black);background:none;border:none;cursor:pointer;text-decoration:underline}
@@ -484,17 +484,16 @@ function buildCbx(){
   });
 }
 function toggleSedeMenu(){
-  const menu=document.getElementById('sede-menu');
-  const trigger=document.getElementById('sede-trigger');
-  if(menu.classList.contains('open')){menu.classList.remove('open');return;}
-  const rect=trigger.getBoundingClientRect();
-  menu.style.top=(rect.bottom+6)+'px';
-  menu.style.left=rect.left+'px';
-  menu.classList.add('open');
+  document.getElementById('sede-menu').classList.toggle('open');
 }
-function scrollTo(id,btn){
-  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
-  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+function scrollTo(id, btn){
+  const el = document.getElementById(id);
+  if(!el) return;
+  // Offset for sticky navbar (56px) + controls bar (~52px) + small margin
+  const offset = 56 + 52 + 16;
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({top, behavior:'smooth'});
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
 function selectAllSedes(){selSedes=new Set(Object.keys(SEDES));document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=true);upLbl();refresh()}
