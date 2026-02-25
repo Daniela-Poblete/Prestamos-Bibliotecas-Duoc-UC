@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Préstamos Bibliotecarios · Duoc UC 2023–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #111111;
+  --black2: #1a1a1a;
+  --dark: #222222;
+  --dark2: #2a2a2a;
+  --yellow: #F5B800;
+  --yellow2: #E5AA00;
+  --yellow-soft: rgba(245,184,0,0.12);
+  --white: #FFFFFF;
+  --gray: #888888;
+  --gray2: #555555;
+  --gray3: #333333;
+  --border: rgba(255,255,255,0.08);
+  --red: #E8192C;
+  --blue: #4A9FE0;
+  --green: #38C48A;
+  --purple: #A78BFA;
+  --orange: #FB923C;
+  --card-bg: #1e1e1e;
+  --section-bg: #f5f4f0;
+  --section-text: #1a1a1a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--section-text);min-height:100vh;overflow-x:hidden}
+
+/* NAVBAR */
+.navbar{background:var(--black);height:56px;display:flex;align-items:center;padding:0 32px;position:sticky;top:0;z-index:200;border-bottom:2px solid var(--yellow)}
+.nav-brand{display:flex;align-items:center;gap:12px;padding-right:24px;border-right:1px solid var(--gray2);margin-right:24px;flex-shrink:0}
+.nav-brand-text{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.nav-brand-text span{color:var(--yellow)}
+.nav-section{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);line-height:1.3;margin-right:32px;flex-shrink:0}
+.nav-tabs{display:flex;gap:0;flex:1;overflow-x:auto}
+.nav-tab{padding:0 18px;height:56px;display:flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);cursor:pointer;border-bottom:3px solid transparent;transition:all 150ms;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:'Outfit',sans-serif}
+.nav-tab:hover{color:var(--white)}
+.nav-tab.active{color:var(--yellow);border-bottom-color:var(--yellow);background:rgba(245,184,0,0.06)}
+.nav-date{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--gray);text-transform:uppercase;white-space:nowrap;margin-left:auto;padding-left:24px;flex-shrink:0}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#c8920a 0%,#d4a017 40%,#c88a00 70%,#9a6800 100%);padding:52px 48px 48px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,0.06);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-80px;right:80px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none}
+.hero-inner{max-width:1400px;margin:0 auto;position:relative}
+.hero-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.hero-eyebrow-line{width:32px;height:3px;background:var(--black);border-radius:2px}
+.hero-eyebrow-text{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--black);opacity:.7}
+.hero h1{font-size:58px;font-weight:900;line-height:1.0;color:var(--black);letter-spacing:-2px;margin-bottom:16px}
+.hero h1 em{font-style:italic;font-weight:300}
+.hero-desc{font-size:14px;font-weight:400;color:rgba(0,0,0,0.65);line-height:1.6;max-width:540px}
+
+/* KPI STRIP */
+.kpi-strip{background:var(--black);padding:36px 48px}
+.kpi-strip-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.kpi-item{padding:0 24px;border-right:1px solid var(--gray3)}
+.kpi-item:first-child{padding-left:0}
+.kpi-item:last-child{border-right:none}
+.kpi-num{font-size:44px;font-weight:900;line-height:1;letter-spacing:-2px;font-family:'JetBrains Mono',monospace;margin-bottom:8px}
+.kpi-num.yellow{color:var(--yellow)}
+.kpi-num.blue{color:var(--blue)}
+.kpi-num.purple{color:var(--purple)}
+.kpi-num.green{color:var(--green)}
+.kpi-num.orange{color:var(--orange)}
+.kpi-title{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray);margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--gray2);font-weight:400}
+.kpi-delta{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.kpi-delta.up{background:rgba(56,196,138,0.15);color:#38C48A}
+.kpi-delta.down{background:rgba(232,25,44,0.12);color:#E8192C}
+
+/* CONTROLS */
+.controls-bar{background:var(--white);border-bottom:1px solid #e8e4dc;padding:0 48px;position:sticky;top:58px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.controls-inner{max-width:1400px;margin:0 auto;display:flex;align-items:stretch;gap:0;overflow-x:auto}
+.ctrl-group{display:flex;align-items:center;gap:6px;padding:10px 24px 10px 0;border-right:1px solid #e8e4dc;margin-right:20px;flex-shrink:0}
+.ctrl-group:last-child{border-right:none;margin-right:0}
+.ctrl-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#999;white-space:nowrap;margin-right:2px}
+.ctrl-btn{padding:5px 13px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:11.5px;font-weight:600;color:#777;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap}
+.ctrl-btn:hover{border-color:var(--yellow2);color:var(--black)}
+.ctrl-btn.active{background:var(--black);border-color:var(--black);color:var(--yellow)}
+.ctrl-btn.y23.active{background:#2a2000;border-color:#c8920a;color:#F5B800}
+.ctrl-btn.y24.active{background:#001a2e;border-color:#2563AD;color:#4A9FE0}
+.ctrl-btn.y25.active{background:#2a0005;border-color:#a00010;color:#E8192C}
+
+/* SEDE DROPDOWN */
+.sede-dropdown{position:relative}
+.sede-trigger{padding:5px 28px 5px 13px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:11.5px;font-weight:600;color:#444;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap;min-width:152px;position:relative;display:flex;align-items:center;gap:6px}
+.sede-trigger::after{content:'▾';position:absolute;right:10px;font-size:9px;color:#999}
+.sede-trigger:hover{border-color:var(--yellow2)}
+.sede-trigger.has-sel{background:var(--black);border-color:var(--yellow2);color:var(--yellow)}
+.sede-menu{position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.14);min-width:240px;max-height:360px;overflow-y:auto;z-index:300;display:none;padding:8px}
+.sede-menu.open{display:block}
+.sede-menu-header{display:flex;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid #eee;margin-bottom:4px}
+.sede-menu-header button{font-size:11px;font-family:'Outfit',sans-serif;font-weight:700;color:var(--black);background:none;border:none;cursor:pointer;text-decoration:underline}
+.sede-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;transition:background 150ms;color:#333}
+.sede-item:hover{background:#f5f3ee}
+.sede-item input[type=checkbox]{accent-color:var(--black);width:14px;height:14px;flex-shrink:0}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:36px 48px 60px}
+
+/* SECTION */
+.section-block{margin-bottom:40px}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid var(--yellow)}
+.section-num{background:var(--black);color:var(--yellow);font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:4px;letter-spacing:.05em}
+.section-head h2{font-size:22px;font-weight:800;color:var(--black);letter-spacing:-.5px}
+.section-head-right{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#999}
+
+/* CHART CARDS */
+.chart-grid{display:grid;gap:16px}
+.g-2{grid-template-columns:1fr 1fr}
+.g-3-1{grid-template-columns:2.2fr 1fr}
+.g-3{grid-template-columns:1fr 1fr 1fr}
+.chart-card{background:var(--white);border-radius:12px;border:1px solid #e8e4dc;overflow:hidden;transition:box-shadow 150ms}
+.chart-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.09)}
+.chart-card.dark{background:var(--black);border-color:var(--gray3)}
+.chart-card-head{padding:18px 22px 14px;border-bottom:1px solid #f0ece4}
+.chart-card.dark .chart-card-head{border-bottom-color:var(--gray3)}
+.chart-card-head h3{font-size:14px;font-weight:700;color:var(--black);letter-spacing:-.2px;margin-bottom:2px}
+.chart-card.dark .chart-card-head h3{color:var(--white)}
+.chart-card-head p{font-size:11px;color:#999;font-weight:400}
+.chart-card.dark .chart-card-head p{color:var(--gray)}
+.chart-card-body{padding:16px 22px 20px}
+.legend-row{display:flex;gap:16px;flex-wrap:wrap;padding:0 22px 14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#666;font-weight:500}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-line{width:18px;height:3px;border-radius:2px;flex-shrink:0}
+
+/* HEATMAP */
+.heatmap-scroll{overflow-x:auto}
+.heatmap-tbl{width:100%;border-collapse:collapse;font-size:10.5px;min-width:700px}
+.heatmap-tbl th{padding:6px 6px;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#999;text-transform:uppercase;background:var(--white)}
+.heatmap-tbl th:first-child{text-align:left;padding-left:4px}
+.heatmap-tbl td{padding:5px 4px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;cursor:default;transition:opacity 150ms;border-radius:3px}
+.heatmap-tbl td:first-child{text-align:left;font-family:'Outfit',sans-serif;font-weight:600;font-size:11px;color:#222;padding-left:4px;white-space:nowrap}
+.heatmap-tbl td.tc{font-weight:700;font-family:'JetBrains Mono',monospace;color:#111}
+.heatmap-tbl tr:hover td{opacity:.85}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table thead th{padding:9px 12px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;border-bottom:2px solid #e8e4dc;text-align:left;cursor:pointer;user-select:none;white-space:nowrap;background:var(--white)}
+.data-table thead th:hover{color:var(--black)}
+.data-table thead th.asc::after{content:' ↑'}
+.data-table thead th.desc::after{content:' ↓'}
+.data-table tbody tr{border-bottom:1px solid #f0ece4;transition:background 100ms}
+.data-table tbody tr:hover{background:#faf8f3}
+.data-table td{padding:8px 12px;vertical-align:middle}
+.td-s{font-weight:700;font-size:11.5px;color:var(--black)}
+.td-n{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;color:#333}
+.td-c{text-align:right;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+.pill.up{background:rgba(56,196,138,0.12);color:#1a9e68}
+.pill.dn{background:rgba(232,25,44,0.08);color:#c0001b}
+.pill.fl{background:#f0ece4;color:#999}
+.bar-w{width:72px;height:5px;background:#f0ece4;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar-f{height:100%;border-radius:3px;background:var(--black);transition:width .5s ease}
+
+/* FOOTER */
+.footer{background:var(--black);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.footer-brand{font-size:15px;font-weight:800;color:var(--white)}
+.footer-brand span{color:var(--yellow)}
+.footer-text{font-size:11px;color:var(--gray)}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.kpi-strip-inner{grid-template-columns:repeat(3,1fr)}.g-3-1,.g-3{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.main{padding:24px 16px}.hero{padding:32px 20px}.hero h1{font-size:36px}.kpi-strip{padding:24px 20px}.kpi-strip-inner{grid-template-columns:1fr 1fr}.kpi-num{font-size:30px}.controls-bar{padding:0 16px}.g-2,.g-3-1,.g-3{grid-template-columns:1fr}.navbar{padding:0 16px}.nav-tabs{display:none}.footer{padding:20px}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.kpi-item{animation:fadeUp .5s ease both}
+.kpi-item:nth-child(1){animation-delay:0ms}.kpi-item:nth-child(2){animation-delay:80ms}.kpi-item:nth-child(3){animation-delay:160ms}.kpi-item:nth-child(4){animation-delay:240ms}.kpi-item:nth-child(5){animation-delay:320ms}
+.chart-card{animation:fadeUp .4s ease both;animation-delay:200ms}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-brand-text">Duoc<span>UC</span></div>
+  </div>
+  <div class="nav-section">Sistema de<br>Bibliotecas</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active">Resumen</button>
+    <button class="nav-tab">Tendencias</button>
+    <button class="nav-tab">Por Sede</button>
+    <button class="nav-tab">Estacionalidad</button>
+  </div>
+  <div class="nav-date">Datos: 2023 – 2025</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <div class="hero-eyebrow-text">Informe · Período 2023 – 2025 · Sistema de Bibliotecas</div>
+    </div>
+    <h1>Préstamos<br><em>Bibliotecarios</em></h1>
+    <p class="hero-desc">Visión ejecutiva de usos, préstamos y recursos digitales en 20 sedes. Tres años de datos comparados mes a mes para detectar tendencias, estacionalidad y diferencias entre colecciones.</p>
+  </div>
+</section>
+
+<section class="kpi-strip">
+  <div class="kpi-strip-inner">
+    <div class="kpi-item">
+      <div class="kpi-title">Usos Totales 2025</div>
+      <div class="kpi-num yellow">2.530.565</div>
+      <div class="kpi-sub">Cuentapersonas acumulado</div>
+      <div class="kpi-delta up">▲ +6,8% vs 2024</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-title">Préstamos MBB 2025</div>
+      <div class="kpi-num blue">170.849</div>
+      <div class="kpi-sub">Material Bibliográfico Impreso</div>
+      <div class="kpi-delta down">▼ −28,4% vs 2024</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-title">Recursos Digitales 2025</div>
+      <div class="kpi-num purple">292.520</div>
+      <div class="kpi-sub">Plataformas digitales</div>
+      <div class="kpi-delta down">▼ −27,0% vs 2024</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-title">Total Histórico 3 Años</div>
+      <div class="kpi-num green">7.054.586</div>
+      <div class="kpi-sub">Suma 2023 + 2024 + 2025</div>
+      <div class="kpi-delta up">▲ +17,7% bienio</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-title">Sede más Activa 2025</div>
+      <div class="kpi-num orange" style="font-size:22px;letter-spacing:-.5px;padding-top:10px">San Bernardo</div>
+      <div class="kpi-sub">269.481 usos · +27% interanual</div>
+      <div class="kpi-delta up">▲ top sede 2025</div>
+    </div>
+  </div>
+</section>
+
+<div class="controls-bar">
+  <div class="controls-inner">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Métrica</span>
+      <button class="ctrl-btn active" data-metric="total" onclick="setMetric('total')">Total Usos</button>
+      <button class="ctrl-btn" data-metric="mbb" onclick="setMetric('mbb')">Préstamos MBB</button>
+      <button class="ctrl-btn" data-metric="digital" onclick="setMetric('digital')">Digitales</button>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Tipo</span>
+      <button class="ctrl-btn active" data-view="line" onclick="setView('line')">Línea</button>
+      <button class="ctrl-btn" data-view="bar" onclick="setView('bar')">Barras</button>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Sedes</span>
+      <div class="sede-dropdown">
+        <div class="sede-trigger" id="sede-trigger" onclick="toggleSedeMenu()">
+          <span id="sede-trigger-text">Todas las sedes</span>
+        </div>
+        <div class="sede-menu" id="sede-menu">
+          <div class="sede-menu-header">
+            <button onclick="selectAllSedes()">Seleccionar todas</button>
+            <button onclick="clearSedes()">Limpiar</button>
+          </div>
+          <div id="sede-checkboxes"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Años</span>
+      <button class="ctrl-btn y23 active" data-year="2023" onclick="toggleYear(2023)">2023</button>
+      <button class="ctrl-btn y24 active" data-year="2024" onclick="toggleYear(2024)">2024</button>
+      <button class="ctrl-btn y25 active" data-year="2025" onclick="toggleYear(2025)">2025</button>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Tendencia Mensual &amp; Estacionalidad</h2>
+      <div class="section-head-right">Ene – Dic · Cuentapersonas</div>
+    </div>
+    <div class="chart-grid g-3-1">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <h3>Usos Mensuales 2023 · 2024 · 2025</h3>
+          <p>Comparativo interanual · detecta picos, valles y estacionalidad</p>
+        </div>
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#F5B800"></div>2023</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4A9FE0"></div>2024</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#E8192C"></div>2025</div>
+        </div>
+        <div class="chart-card-body" style="padding-top:0"><div style="height:260px"><canvas id="chartTendencia"></canvas></div></div>
+      </div>
+      <div class="chart-card dark">
+        <div class="chart-card-head">
+          <h3>Variación % Mensual</h3>
+          <p>Cambio interanual mes a mes</p>
+        </div>
+        <div class="chart-card-body"><div style="height:260px"><canvas id="chartVariacion"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Composición del Sistema</h2>
+      <div class="section-head-right">MBB · Digitales · Tipo usuario</div>
+    </div>
+    <div class="chart-grid g-3">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <h3>MBB vs Recursos Digitales</h3>
+          <p>Evolución anual de las dos tipologías principales</p>
+        </div>
+        <div class="chart-card-body"><div style="height:240px"><canvas id="chartMBBvsDig"></canvas></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <h3>Tipo de Usuario · 2025</h3>
+          <p>Perfil de uso del sistema bibliotecario</p>
+        </div>
+        <div class="chart-card-body"><div style="height:240px"><canvas id="chartTipoUsuario"></canvas></div></div>
+      </div>
+      <div class="chart-card dark">
+        <div class="chart-card-head">
+          <h3>Colección MBB · 2025</h3>
+          <p>Distribución del uso de material impreso</p>
+        </div>
+        <div class="chart-card-body"><div style="height:240px"><canvas id="chartColeccion"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>Análisis por Sede</h2>
+      <div class="section-head-right">Top 12 · interanual</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <h3>Ranking de Sedes · Usos Totales 2023 / 2024 / 2025</h3>
+        <p>Filtra sedes con el selector superior · ordenado por usos 2025</p>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-line" style="background:#F5B800"></div>2023</div>
+        <div class="legend-item"><div class="legend-line" style="background:#4A9FE0"></div>2024</div>
+        <div class="legend-item"><div class="legend-line" style="background:#E8192C"></div>2025</div>
+      </div>
+      <div class="chart-card-body" style="padding-top:0"><div style="height:300px"><canvas id="chartSedes"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Mapa de Calor · Estacionalidad 2025</h2>
+      <div class="section-head-right">Intensidad relativa por sede</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <h3>Uso Mensual por Sede · 2025</h3>
+        <p>Cuentapersonas por mes · escala de color relativa al máximo de cada sede · Top 15 sedes</p>
+      </div>
+      <div class="chart-card-body">
+        <div class="heatmap-scroll" id="heatmap-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>Tabla Comparativa · Todas las Sedes</h2>
+      <div class="section-head-right">Clic en columna para ordenar</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-body">
+        <div style="overflow-x:auto">
+          <table class="data-table" id="sede-table">
+            <thead>
+              <tr>
+                <th onclick="sortTable(0)">Sede</th>
+                <th onclick="sortTable(1)" style="text-align:right">Usos 2023</th>
+                <th onclick="sortTable(2)" style="text-align:right">Usos 2024</th>
+                <th onclick="sortTable(3)" style="text-align:right">Usos 2025</th>
+                <th onclick="sortTable(4)" style="text-align:right">Var 24/23</th>
+                <th onclick="sortTable(5)" style="text-align:right">Var 25/24</th>
+                <th onclick="sortTable(6)" style="text-align:right">MBB 2023</th>
+                <th onclick="sortTable(7)" style="text-align:right">MBB 2024</th>
+                <th onclick="sortTable(8)" style="text-align:right">MBB 2025</th>
+                <th>Rel.</th>
+              </tr>
+            </thead>
+            <tbody id="sede-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-brand">Duoc<span>UC</span></div>
+  <div class="footer-text">Sistema de Bibliotecas · Dashboard Indicadores Anuales 2023–2025 · Datos: Indicadores Anuales xlsx</div>
+</footer>
+
+<script>
+const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const TOTALS={2023:[53088,19991,233123,269258,297009,274139,102743,169844,211467,207107,227573,88269],2024:[71467,28788,173725,345477,313656,268569,167745,160559,209411,263209,240257,127547],2025:[61904,21530,215479,318407,273394,286346,139293,130298,293196,475512,202127,113079]};
+const MBB_A={2023:254341,2024:238476,2025:170849};
+const DIG_A={2023:400630,2024:401020,2025:292520};
+const TIPO25={'Alumno Diurno':304375,'Alumno Vespertino':126335,'Docente':24844,'Alumno Virtual':16960,'Administrativos':14788,'No Regular':6400};
+const SEDES={
+  'Alameda':{u23:107049,u24:112961,u25:88575,m23:10250,m24:7064,m25:6428},
+  'Antonio Varas':{u23:223210,u24:288058,u25:308509,m23:24700,m24:21632,m25:14048},
+  'Campus Arauco':{u23:65395,u24:73838,u25:68659,m23:1019,m24:681,m25:976},
+  'Campus Nacimiento':{u23:17218,u24:53084,u25:53087,m23:398,m24:854,m25:363},
+  'Campus Villarrica':{u23:33231,u24:31640,u25:34044,m23:1224,m24:1132,m25:1635},
+  'Concepción':{u23:143594,u24:154683,u25:143120,m23:21578,m24:20036,m25:15424},
+  'Maipú':{u23:108610,u24:81830,u25:72684,m23:15998,m24:11765,m25:7838},
+  'Melipilla':{u23:140406,u24:144380,u25:124788,m23:4250,m24:2941,m25:1961},
+  'P. Alonso de Ovalle':{u23:97164,u24:64231,u25:113128,m23:16460,m24:14461,m25:10109},
+  'Plaza Norte':{u23:99111,u24:96507,u25:92626,m23:9664,m24:8091,m25:5251},
+  'Plaza Oeste':{u23:84234,u24:81562,u25:77643,m23:10321,m24:7823,m25:7264},
+  'Plaza Vespucio':{u23:70804,u24:103409,u25:105577,m23:14325,m24:14768,m25:10353},
+  'Puente Alto':{u23:58944,u24:69934,u25:83192,m23:19828,m24:16885,m25:10288},
+  'Puerto Montt':{u23:105534,u24:92915,u25:92133,m23:6571,m24:4492,m25:2813},
+  'San Bernardo':{u23:159959,u24:212135,u25:269481,m23:11223,m24:13976,m25:11602},
+  'San Carlos de Apoquindo':{u23:193262,u24:254138,u25:295521,m23:21020,m24:24479,m25:14363},
+  'San Joaquín':{u23:111476,u24:103109,u25:173184,m23:9790,m24:8465,m25:5839},
+  'Valp. Luis Cousiño':{u23:23400,u24:19725,u25:20848,m23:0,m24:0,m25:1057},
+  'Valparaíso':{u23:203632,u24:216483,u25:206767,m23:23998,m24:23511,m25:17383},
+  'Viña del Mar':{u23:107378,u24:115788,u25:106999,m23:29919,m24:34384,m25:25990}
+};
+const M25={
+  'Alameda':[4038,1625,6889,10791,10615,12515,6440,5947,7267,8313,8941,5194],
+  'Antonio Varas':[3574,0,18893,24533,23142,22031,9076,7931,16435,160763,15010,7121],
+  'Campus Arauco':[2194,722,5687,8570,8786,8991,5921,3988,5437,6418,6340,5605],
+  'Campus Nacimiento':[1626,599,3879,5353,6059,5693,3375,3348,5873,7085,6171,4026],
+  'Campus Villarrica':[690,240,2475,5153,4446,4486,2418,1688,3333,3863,3530,1722],
+  'Concepción':[4011,1054,14226,19082,16831,17851,7998,9766,15745,15352,13948,7256],
+  'Maipú':[2210,950,6587,10119,9141,10203,4433,4404,6887,7505,6849,3396],
+  'Melipilla':[3016,1516,12369,19927,14631,16059,10178,6161,10561,11365,11172,7833],
+  'P. Alonso de Ovalle':[3261,1066,12822,18252,13760,14808,5935,6740,9900,10534,9969,6081],
+  'Plaza Norte':[3081,1512,7719,13278,10818,12005,7265,5119,7795,8834,9408,5792],
+  'Plaza Oeste':[3708,3408,7994,10573,7741,9287,6324,3966,6188,6977,6821,4656],
+  'Plaza Vespucio':[2727,1245,8489,14365,12877,14678,8531,6218,9290,9810,10266,7081],
+  'Puente Alto':[1875,408,6885,11749,12358,12994,5794,5724,7747,7269,6849,3540],
+  'Puerto Montt':[2028,1270,7065,10598,9063,11025,6928,6328,10361,11308,10803,5356],
+  'San Bernardo':[5338,1026,29853,41777,37011,33965,15415,16597,25881,27165,23203,12250],
+  'San Carlos de Apoquindo':[5420,1293,19020,24750,22724,24790,12599,11254,105626,45084,13922,9039],
+  'San Joaquín':[3864,536,8050,13624,9462,11565,5381,5585,8740,94354,8853,3170],
+  'Valp. Luis Cousiño':[868,264,2225,3439,2609,2552,1050,1513,1708,1976,1865,779],
+  'Valparaíso':[5013,1853,21912,35036,27368,28489,8665,11324,18809,20669,19169,8460],
+  'Viña del Mar':[3362,943,12440,17438,13952,12359,5567,6697,9613,10868,9038,4722]
+};
+
+let metric='total',view='line',selSedes=new Set(Object.keys(SEDES)),activeYears=new Set([2023,2024,2025]),sortCol=3,sortAsc=false,charts={};
+const C={2023:{l:'#F5B800',f:'rgba(245,184,0,0.15)'},2024:{l:'#4A9FE0',f:'rgba(74,159,224,0.15)'},2025:{l:'#E8192C',f:'rgba(232,25,44,0.12)'}};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  buildCbx();renderAll();
+  document.addEventListener('click',e=>{
+    if(!document.getElementById('sede-trigger').contains(e.target)&&!document.getElementById('sede-menu').contains(e.target))
+      document.getElementById('sede-menu').classList.remove('open');
+  });
+});
+
+function buildCbx(){
+  const c=document.getElementById('sede-checkboxes');
+  Object.keys(SEDES).sort().forEach(s=>{
+    const d=document.createElement('div');d.className='sede-item';
+    d.innerHTML=`<input type="checkbox" checked onchange="toggleSede('${s}')"> ${s}`;
+    c.appendChild(d);
+  });
+}
+function toggleSedeMenu(){document.getElementById('sede-menu').classList.toggle('open')}
+function selectAllSedes(){selSedes=new Set(Object.keys(SEDES));document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=true);upLbl();refresh()}
+function clearSedes(){selSedes.clear();document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=false);upLbl();refresh()}
+function toggleSede(s){selSedes.has(s)?selSedes.delete(s):selSedes.add(s);upLbl();refresh()}
+function upLbl(){
+  const n=selSedes.size,tot=Object.keys(SEDES).length,t=document.getElementById('sede-trigger'),tx=document.getElementById('sede-trigger-text');
+  if(n===tot){tx.textContent='Todas las sedes';t.classList.remove('has-sel')}
+  else if(!n){tx.textContent='Sin sedes';t.classList.add('has-sel')}
+  else{tx.textContent=`${n} sede${n>1?'s':''}`;t.classList.add('has-sel')}
+}
+function setMetric(m){metric=m;document.querySelectorAll('[data-metric]').forEach(b=>b.classList.toggle('active',b.dataset.metric===m));refresh()}
+function setView(v){view=v;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));refresh()}
+function toggleYear(y){
+  if(activeYears.has(y)){if(activeYears.size>1)activeYears.delete(y)}else activeYears.add(y);
+  document.querySelectorAll('[data-year]').forEach(b=>b.classList.toggle('active',activeYears.has(+b.dataset.year)));
+  refresh();
+}
+function refresh(){Object.values(charts).forEach(c=>c.destroy());charts={};renderAll()}
+function renderAll(){rTend();rVar();rMBB();rTipo();rCol();rSedes();rHeat();rTable()}
+
+function getMon(y){
+  if(selSedes.size===Object.keys(SEDES).length)return TOTALS[y];
+  if(y===2025)return MONTHS.map((_,i)=>[...selSedes].reduce((s,k)=>s+(M25[k]?.[i]||0),0));
+  const key=`u${String(y).slice(2)}`;
+  const sel=[...selSedes].reduce((s,k)=>s+(SEDES[k]?.[key]||0),0);
+  const all=Object.values(SEDES).reduce((s,v)=>s+(v[key]||0),0);
+  const r=all>0?sel/all:0;
+  return TOTALS[y].map(v=>Math.round(v*r));
+}
+function fN(n){return(n||0).toLocaleString('es-CL')}
+function pct(a,b){return b>0?((a-b)/b*100).toFixed(1):null}
+
+function rTend(){
+  const ctx=document.getElementById('chartTendencia').getContext('2d');
+  const yrs=[2023,2024,2025].filter(y=>activeYears.has(y));
+  charts.tend=new Chart(ctx,{
+    type:view==='bar'?'bar':'line',
+    data:{labels:MONTHS,datasets:yrs.map(y=>({label:String(y),data:getMon(y),borderColor:C[y].l,backgroundColor:view==='bar'?C[y].l+'bf':C[y].f,borderWidth:view==='bar'?0:2.5,tension:0.42,fill:view!=='bar',pointRadius:view==='bar'?0:3,pointHoverRadius:5,borderRadius:view==='bar'?4:0}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}
+  });
+}
+function rVar(){
+  const ctx=document.getElementById('chartVariacion').getContext('2d');
+  const ds=[];
+  const mk=(a,b,lbl,col)=>({label:lbl,data:MONTHS.map((_,i)=>TOTALS[b][i]>0?+((TOTALS[a][i]-TOTALS[b][i])/TOTALS[b][i]*100).toFixed(1):0),borderColor:col,backgroundColor:'transparent',borderWidth:2,tension:0.4,fill:false,pointRadius:3});
+  if(activeYears.has(2023)&&activeYears.has(2024))ds.push(mk(2024,2023,'24/23','#4A9FE0'));
+  if(activeYears.has(2024)&&activeYears.has(2025))ds.push(mk(2025,2024,'25/24','#E8192C'));
+  charts.var=new Chart(ctx,{type:'line',data:{labels:MONTHS,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#888',font:{size:10},boxWidth:12,usePointStyle:true}}},scales:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#777',font:{size:9}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#777',font:{size:9},callback:v=>v+'%'}}}}});
+}
+function rMBB(){
+  const ctx=document.getElementById('chartMBBvsDig').getContext('2d');
+  const yrs=[2023,2024,2025].filter(y=>activeYears.has(y));
+  charts.mbb=new Chart(ctx,{type:'bar',data:{labels:yrs.map(String),datasets:[{label:'MBB Impreso',data:yrs.map(y=>MBB_A[y]),backgroundColor:'#E8192C',borderRadius:6},{label:'Digitales',data:yrs.map(y=>DIG_A[y]),backgroundColor:'#111111',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:11,weight:'700'}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+}
+function rTipo(){
+  const ctx=document.getElementById('chartTipoUsuario').getContext('2d');
+  const labels=Object.keys(TIPO25),vals=Object.values(TIPO25),tot=vals.reduce((a,b)=>a+b,0);
+  const pal=['#111111','#333333','#E8192C','#4A9FE0','#F5B800','#888888'];
+  charts.tipo=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:pal,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fN(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`}}}}});
+}
+function rCol(){
+  const ctx=document.getElementById('chartColeccion').getContext('2d');
+  charts.col=new Chart(ctx,{type:'doughnut',data:{labels:['Renovación','Uso Interno','Préstamo','Revistas','Otros'],datasets:[{data:[83625,46032,40431,1200,561],backgroundColor:['#F5B800','#4A9FE0','#E8192C','#888','#444'],borderWidth:2,borderColor:'#111',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:'#aaa',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:c=>` ${c.label}: ${fN(c.raw)}`}}}}});
+}
+function rSedes(){
+  const ctx=document.getElementById('chartSedes').getContext('2d');
+  const yrs=[2023,2024,2025].filter(y=>activeYears.has(y));
+  const sedes=[...selSedes].sort((a,b)=>(SEDES[b]?.u25||0)-(SEDES[a]?.u25||0)).slice(0,12);
+  charts.sed=new Chart(ctx,{type:'bar',data:{labels:sedes.map(s=>s.length>16?s.split(' ').slice(0,2).join(' '):s),datasets:yrs.map(y=>({label:String(y),data:sedes.map(s=>SEDES[s]?.[`u${String(y).slice(2)}`]||0),backgroundColor:C[y].l+'bf',borderColor:C[y].l,borderWidth:1,borderRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9.5},maxRotation:35}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}}});
+}
+function rHeat(){
+  const c=document.getElementById('heatmap-container');
+  const sedes=[...selSedes].filter(s=>M25[s]).sort((a,b)=>SEDES[b].u25-SEDES[a].u25).slice(0,15);
+  let h='<table class="heatmap-tbl"><thead><tr><th>Sede</th>';
+  MONTHS.forEach(m=>h+=`<th>${m}</th>`);
+  h+='<th>Total</th></tr></thead><tbody>';
+  sedes.forEach(sede=>{
+    const data=M25[sede]||[],max=Math.max(...data)||1,tot=data.reduce((a,b)=>a+b,0);
+    h+=`<tr><td>${sede}</td>`;
+    data.forEach(v=>{
+      const i=v/max;
+      let bg,fg;
+      if(i<0.25){bg=`rgba(245,184,0,${0.05+i*0.4})`;fg='#666'}
+      else if(i<0.55){bg=`rgba(245,184,0,${0.15+i*0.6})`;fg='#111'}
+      else if(i<0.8){bg=`rgba(200,146,10,${0.5+i*0.4})`;fg='#000'}
+      else{bg=`rgba(17,17,17,${0.7+i*0.3})`;fg='#F5B800'}
+      const lbl=v>=1000?(v/1000).toFixed(0)+'K':v;
+      h+=`<td style="background:${bg};color:${fg};font-weight:${i>0.5?'700':'400'}">${lbl}</td>`;
+    });
+    h+=`<td class="tc">${fN(tot)}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  c.innerHTML=h;
+}
+function rTable(){
+  const tbody=document.getElementById('sede-tbody');
+  let arr=Object.entries(SEDES).filter(([s])=>selSedes.has(s));
+  const maxU25=Math.max(...arr.map(([,v])=>v.u25));
+  arr.sort(([sa,a],[sb,b])=>{
+    const keys=[null,'u23','u24','u25',null,null,'m23','m24','m25'];
+    if(sortCol===0)return sortAsc?sa.localeCompare(sb):sb.localeCompare(sa);
+    if(sortCol===4){const pa=pct(a.u24,a.u23),pb=pct(b.u24,b.u23);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
+    if(sortCol===5){const pa=pct(a.u25,a.u24),pb=pct(b.u25,b.u24);return sortAsc?(+pa||0)-(+pb||0):(+pb||0)-(+pa||0)}
+    const k=keys[sortCol];if(!k)return 0;
+    return sortAsc?a[k]-b[k]:b[k]-a[k];
+  });
+  const pill=v=>{
+    if(v===null)return'<span class="pill fl">–</span>';
+    const cls=+v>=0?'up':'dn',sym=+v>=0?'▲':'▼';
+    return`<span class="pill ${cls}">${sym}${Math.abs(v)}%</span>`;
+  };
+  tbody.innerHTML=arr.map(([s,d])=>{
+    const v24=pct(d.u24,d.u23),v25=pct(d.u25,d.u24),bw=Math.round(d.u25/maxU25*100);
+    return`<tr><td class="td-s">${s}</td><td class="td-n">${fN(d.u23)}</td><td class="td-n">${fN(d.u24)}</td><td class="td-n" style="font-weight:700">${fN(d.u25)}</td><td class="td-c">${pill(v24)}</td><td class="td-c">${pill(v25)}</td><td class="td-n">${fN(d.m23)}</td><td class="td-n">${fN(d.m24)}</td><td class="td-n">${fN(d.m25)}</td><td><span class="bar-w"><span class="bar-f" style="width:${bw}%"></span></span></td></tr>`;
+  }).join('');
+  document.querySelectorAll('#sede-table thead th').forEach((th,i)=>{
+    th.classList.remove('asc','desc');
+    if(i===sortCol)th.classList.add(sortAsc?'asc':'desc');
+  });
+}
+function sortTable(c){sortCol===c?sortAsc=!sortAsc:(sortCol=c,sortAsc=false);rTable()}
+
+Chart.defaults.font.family="'Outfit', sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.animation.duration=450;
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+</script>
+</body>
+</html>
