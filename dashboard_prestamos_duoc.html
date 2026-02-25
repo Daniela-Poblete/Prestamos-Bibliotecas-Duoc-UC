@@ -89,18 +89,18 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
 .ctrl-btn.y25.active{background:#2a0005;border-color:#a00010;color:#E8192C}
 
 /* SEDE DROPDOWN */
-.sede-dropdown{position:relative}
-.sede-trigger{padding:5px 28px 5px 13px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:11.5px;font-weight:600;color:#444;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap;min-width:152px;position:relative;display:flex;align-items:center;gap:6px}
-.sede-trigger::after{content:'▾';position:absolute;right:10px;font-size:9px;color:#999}
+.sede-dropdown{position:static}
+.sede-trigger{padding:7px 32px 7px 16px;border:1.5px solid #e0dbd0;background:none;border-radius:20px;font-size:13px;font-weight:600;color:#444;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 150ms;white-space:nowrap;min-width:180px;position:relative;display:flex;align-items:center;gap:6px}
+.sede-trigger::after{content:'▾';position:absolute;right:12px;font-size:11px;color:#999}
 .sede-trigger:hover{border-color:var(--yellow2)}
 .sede-trigger.has-sel{background:var(--black);border-color:var(--yellow2);color:var(--yellow)}
-.sede-menu{position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.14);min-width:240px;max-height:360px;overflow-y:auto;z-index:300;display:none;padding:8px}
+.sede-menu{position:fixed;top:auto;left:auto;background:var(--white);border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);width:300px;max-height:420px;overflow-y:auto;z-index:9999;display:none;padding:10px}
 .sede-menu.open{display:block}
-.sede-menu-header{display:flex;justify-content:space-between;padding:4px 8px 8px;border-bottom:1px solid #eee;margin-bottom:4px}
-.sede-menu-header button{font-size:11px;font-family:'Outfit',sans-serif;font-weight:700;color:var(--black);background:none;border:none;cursor:pointer;text-decoration:underline}
-.sede-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;transition:background 150ms;color:#333}
+.sede-menu-header{display:flex;justify-content:space-between;padding:4px 8px 10px;border-bottom:1px solid #eee;margin-bottom:6px}
+.sede-menu-header button{font-size:12px;font-family:'Outfit',sans-serif;font-weight:700;color:var(--black);background:none;border:none;cursor:pointer;text-decoration:underline}
+.sede-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:background 150ms;color:#333}
 .sede-item:hover{background:#f5f3ee}
-.sede-item input[type=checkbox]{accent-color:var(--black);width:14px;height:14px;flex-shrink:0}
+.sede-item input[type=checkbox]{accent-color:var(--black);width:16px;height:16px;flex-shrink:0}
 
 /* MAIN */
 .main{max-width:1400px;margin:0 auto;padding:36px 48px 60px}
@@ -185,10 +185,10 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
   </div>
   <div class="nav-section">Sistema de<br>Bibliotecas</div>
   <div class="nav-tabs">
-    <button class="nav-tab active">Resumen</button>
-    <button class="nav-tab">Tendencias</button>
-    <button class="nav-tab">Por Sede</button>
-    <button class="nav-tab">Estacionalidad</button>
+    <button class="nav-tab active" onclick="scrollTo('sec-resumen',this)">Resumen</button>
+    <button class="nav-tab" onclick="scrollTo('sec-tendencias',this)">Tendencias</button>
+    <button class="nav-tab" onclick="scrollTo('sec-sedes',this)">Por Sede</button>
+    <button class="nav-tab" onclick="scrollTo('sec-estacionalidad',this)">Estacionalidad</button>
   </div>
   <div class="nav-date">Datos: 2023 – 2025</div>
 </nav>
@@ -204,7 +204,7 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
   </div>
 </section>
 
-<section class="kpi-strip">
+<section class="kpi-strip" id="sec-resumen">
   <div class="kpi-strip-inner">
     <div class="kpi-item">
       <div class="kpi-title">Usos Totales 2025</div>
@@ -278,7 +278,7 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
 
 <main class="main">
 
-  <div class="section-block">
+  <div class="section-block" id="sec-tendencias">
     <div class="section-head">
       <span class="section-num">01</span>
       <h2>Tendencia Mensual &amp; Estacionalidad</h2>
@@ -338,7 +338,7 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block" id="sec-sedes">
     <div class="section-head">
       <span class="section-num">03</span>
       <h2>Análisis por Sede</h2>
@@ -358,7 +358,7 @@ body{font-family:'Outfit',sans-serif;background:var(--section-bg);color:var(--se
     </div>
   </div>
 
-  <div class="section-block">
+  <div class="section-block" id="sec-estacionalidad">
     <div class="section-head">
       <span class="section-num">04</span>
       <h2>Mapa de Calor · Estacionalidad 2025</h2>
@@ -483,7 +483,20 @@ function buildCbx(){
     c.appendChild(d);
   });
 }
-function toggleSedeMenu(){document.getElementById('sede-menu').classList.toggle('open')}
+function toggleSedeMenu(){
+  const menu=document.getElementById('sede-menu');
+  const trigger=document.getElementById('sede-trigger');
+  if(menu.classList.contains('open')){menu.classList.remove('open');return;}
+  const rect=trigger.getBoundingClientRect();
+  menu.style.top=(rect.bottom+6)+'px';
+  menu.style.left=rect.left+'px';
+  menu.classList.add('open');
+}
+function scrollTo(id,btn){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
 function selectAllSedes(){selSedes=new Set(Object.keys(SEDES));document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=true);upLbl();refresh()}
 function clearSedes(){selSedes.clear();document.querySelectorAll('#sede-checkboxes input').forEach(cb=>cb.checked=false);upLbl();refresh()}
 function toggleSede(s){selSedes.has(s)?selSedes.delete(s):selSedes.add(s);upLbl();refresh()}
